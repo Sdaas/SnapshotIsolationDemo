@@ -49,16 +49,31 @@ public class BankDemo {
         t.start();
     }
 
+    private void doRandomTransfer(Random rand) {
+        int numberOfAccounts = bank.numberOfAccounts();
+        int from = rand.nextInt(numberOfAccounts);
+        int to = rand.nextInt(numberOfAccounts);
+
+        int amount = rand.nextInt(100);
+        bank.transfer(from, to, amount);
+    }
+
     // starts up a bunch of threads and does random transfers between bank accounts
     private void doMultithreadedRandomTransfers() throws InterruptedException {
-        // Set up a bunch of threads to do account transfers ..
+
+        Random random = new Random();
         int numberOfThreads = 10;
         List<Callable<Void>> callables = new ArrayList<>();
         for (int i = 0; i < numberOfThreads; i++) {
             callables.add(() -> {
                 System.out.println("Thread number " + Thread.currentThread().getId());
-                for(int j=0; j<10000; j++) {
-                    bank.doRandomTransfers(1000, new Random());
+                for(long j=0; j<100000; j++) {
+                    doRandomTransfer(random);
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
                 System.out.println("Thread number " + Thread.currentThread().getId() + " is finished");
                 return null;
@@ -68,7 +83,6 @@ public class BankDemo {
         ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
         service.invokeAll(callables);
     }
-
 
     public static void main(String[] args) throws InterruptedException {
 
@@ -80,7 +94,5 @@ public class BankDemo {
         demo.printHoldings();
         demo.doLongRunningRead();
         demo.doMultithreadedRandomTransfers();
-
     }
 }
-

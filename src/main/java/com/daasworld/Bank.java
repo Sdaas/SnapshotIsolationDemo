@@ -50,23 +50,6 @@ public class Bank {
         System.out.println("Long Reader. Holding: " + holding + " currentTxn: " + txn.id() + " maxTxn: " + pool.max());
     }
 
-    public void doRandomTransfers(int numberOfTransfers, Random rand){
-        // do transfers of random amounts of money between two random accounts.
-        for (int i = 0; i < numberOfTransfers; i++) {
-            int from = rand.nextInt(numberOfAccounts);
-            int to = rand.nextInt(numberOfAccounts);
-
-            int amount = rand.nextInt(100);
-            transfer(from, to, amount);
-
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public void transfer(int from, int to, long amount) {
         this.transfer(from, to, amount, true);
     }
@@ -109,6 +92,10 @@ public class Bank {
             }
         }
 
+    }
+
+    public int numberOfAccounts(){
+        return numberOfAccounts;
     }
 
     // for debugging
