@@ -17,7 +17,10 @@ From [wikipedia](https://en.wikipedia.org/wiki/Snapshot_isolation) - "snapshot i
 
 ## Instructions
 
-//TODO
+* `mvn clean`
+* `mvn install`
+* `export CLASSPATH="target/SnapshotIsolationDemo-1.0-SNAPSHOT.jar"`
+* `java com.daasworld.BankDemo`
 
 ## References
 
