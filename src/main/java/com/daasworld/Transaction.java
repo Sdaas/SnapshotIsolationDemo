@@ -5,22 +5,26 @@ import java.util.List;
 
 public class Transaction {
 
+    //TODO Maybe we should be storing Transaction and List<Transaction> instead of implementation
     private long id;
-    private List<Long> activeTransactions; // the transactions that were active when this txn was created
+    private long max; // the maximum transaction that was committed when this was created
+    private List<Long> active; // the transactions that were active when this txn was created
 
-    public Transaction(long id, List<Long> active) {
+    public Transaction(long id, List<Long> active, long max) {
         this.id = id;
-        activeTransactions = active;
+        this.active = active;
+        this.max = max;
     }
 
     public long id() {
         return id;
     }
+    public long max() { return max;}
 
     // get list of transactions that were active when this transaction was created
     public List<Long> active() {
         // return a copy of the list;
-        return new ArrayList<>(activeTransactions);
+        return new ArrayList<>(active);
     }
 }
 
