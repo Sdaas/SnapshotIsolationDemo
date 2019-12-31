@@ -24,6 +24,7 @@ public class AccountTest {
         Transaction t = new Transaction(1, new ArrayList<>(), 0);
         assertEquals("initial balance should be 100", 100, a.balance(t));
         assertEquals("should have 1 entries in history", 1, a.history().size());
+        assertEquals("last transaction should have been 0", 0, a.lastTransaction().id());
     }
 
     @Test
@@ -31,10 +32,11 @@ public class AccountTest {
 
         Transaction t = new Transaction(1, new ArrayList<>(), 0 );
         a.update(t,50);
+        assertEquals("should have 2 entries in history", 2, a.history().size());
+        assertEquals("last transaction should have been 2", 1, a.lastTransaction().id());
 
         t = new Transaction(2, new ArrayList<>(), 1);
         assertEquals("balance should be 50", 50, a.balance(t));
-        assertEquals("should have 2 entries in history", 2, a.history().size());
 
         t = new Transaction(2, new ArrayList<>(), 0);
         assertEquals("balance should be 100", 100, a.balance(t));
@@ -56,6 +58,7 @@ public class AccountTest {
         t = new Transaction(6, new ArrayList<>(), 5);
         assertEquals("balance should be 500", 500, a.balance(t));
         assertEquals("should have 6 elements in history", 6, a.history().size());
+        assertEquals("last transaction should have been 5", 5, a.lastTransaction().id());
     }
 
     @Test

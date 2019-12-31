@@ -5,7 +5,8 @@ import java.util.List;
 
 public class Account {
 
-    List<AccountEntry> history = new ArrayList<>();
+    private List<AccountEntry> history = new ArrayList<>();
+    private Transaction lastTransaction; // the last transaction that updated this account
 
     public Account() {
         // nothing
@@ -18,10 +19,19 @@ public class Account {
     }
 
     public synchronized void update(Transaction t, long amount) {
+        lastTransaction = t;
         history.add( new AccountEntry(t, amount));
     }
 
-    public synchronized long balance(Transaction t) {
+    public long balance(Transaction t) {
+
+        // This is not a synchronized method. Which means that the history may be modified by a writer while
+        // this method is executing. So lets work off a copy of the history.
+
+        List<AccountEntry> copyOfHistory;
+        synchronized (this) {
+            copyOfHistory = new ArrayList<>(history);
+        }
 
         // Visibility Rules ...
 
@@ -44,8 +54,13 @@ public class Account {
         return entry.balance;
     }
 
+    public Transaction lastTransaction() {
+        return lastTransaction;
+    }
+
     // for debugging ..
     public synchronized List<AccountEntry> history() {
         return new ArrayList<>(history);
     }
+
 }
