@@ -44,7 +44,7 @@ public class Account {
         long tid = t.id();
         long maxtid = t.max();
         List<Long> active = t.active();
-        AccountEntry entry = history.stream()
+        AccountEntry entry = copyOfHistory.stream()
                 .filter((as) -> as.t.id() < tid)  // condition (a)
                 .filter((as) -> as.t.id() <= maxtid) // condition (b)
                 .filter((as) -> !active.contains(as.t.id()))
