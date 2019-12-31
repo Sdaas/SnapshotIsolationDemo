@@ -33,6 +33,22 @@ public class BankDemo {
         t.start();
     }
 
+    // exercise the long running reader also ....
+    private void doLongRunningRead() {
+        Thread t = new Thread(() -> {
+            System.out.println("Long running reader is running");
+            for (int i = 0; i < 1000; i++) {
+                bank.longRunningRead();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
+    }
+
     // starts up a bunch of threads and does random transfers between bank accounts
     private void doMultithreadedRandomTransfers() throws InterruptedException {
         // Set up a bunch of threads to do account transfers ..
@@ -62,6 +78,7 @@ public class BankDemo {
 
         BankDemo demo = new BankDemo(numberOfAccounts, startingBalance);
         demo.printHoldings();
+        demo.doLongRunningRead();
         demo.doMultithreadedRandomTransfers();
 
     }

@@ -10,9 +10,6 @@ public class Bank {
     private int numberOfAccounts;
     private List<Account> accounts = new ArrayList<>();
 
-    // TODO for debug only
-    private List<String> log = new ArrayList<>();
-
     public Bank(int numberOfAccounts, long startingBalance, TransactionManager pool) {
         this.pool = pool;
         this.numberOfAccounts = numberOfAccounts;
@@ -33,6 +30,24 @@ public class Bank {
                 .sum();
         pool.end(txn);
         return holding;
+    }
+
+    // This is a really slow running transaction to demo snapshot isolation
+    public void longRunningRead(){
+        Transaction txn = pool.next();
+        long holding = 0L;
+
+        for (Account a : accounts) {
+            holding += a.balance(txn);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        pool.end(txn);
+
+        System.out.println("Long Reader. Holding: " + holding + " currentTxn: " + txn.id() + " maxTxn: " + pool.max());
     }
 
     public void doRandomTransfers(int numberOfTransfers, Random rand){
@@ -88,8 +103,6 @@ public class Bank {
         synchronized (a1) {
             synchronized (a2) {
                 Transaction txn = pool.next();
-                // TODO Debug
-                log.add("Txn: " + txn + " from: " + from + " to: " + to + " amount: " + amount);
                 toAccount.update( txn, toAccount.balance(txn) + amount);
                 fromAccount.update( txn, fromAccount.balance(txn) - amount);
                 if( endTransaction ) pool.end(txn);
