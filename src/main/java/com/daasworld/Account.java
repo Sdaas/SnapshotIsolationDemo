@@ -54,6 +54,27 @@ public class Account {
         return entry.balance;
     }
 
+    // An account can be updated only if it has not been updated by
+    // (a) any transaction greater than txn
+    // (b) any transaction that was in flight when txn was created
+    public synchronized boolean canBeUpdatedBy(Transaction txn) {
+
+        if( lastTransaction.id() > txn.id()) return false;
+        List<Long> active = txn.active();
+
+        for(AccountEntry as : history ){
+            if( active.contains(as.t.id())) {
+                // there is a transaction in the history which is also present
+                // in the list of transactions that were active when txn was created
+                // which means that this cannot be updated ...
+                return false;
+            }
+        }
+
+        return true;
+        //TODO Write unit tests for this
+    }
+
     public Transaction lastTransaction() {
         return lastTransaction;
     }

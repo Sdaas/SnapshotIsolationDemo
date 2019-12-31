@@ -2,8 +2,6 @@ package com.daasworld;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
 public class Bank {
     private TransactionManager pool;
@@ -50,20 +48,24 @@ public class Bank {
         System.out.println("Long Reader. Holding: " + holding + " currentTxn: " + txn.id() + " maxTxn: " + pool.max());
     }
 
-    public void transfer(int from, int to, long amount) {
-        this.transfer(from, to, amount, true);
+    private boolean canUpdate(Account a, Transaction t) {
+        // An account can be updated only if it has not been updated by
+        // (a) any transaction greater than t
+        // (b) any transaction that was in flight when t was created
+        return a.canBeUpdatedBy(t);
     }
 
-    public void transfer(int from, int to, long amount, boolean endTransaction) {
+    public void transfer(int from, int to, long amount) {
 
-        // to keep things simple don't allow self-transfers ...
-        // here is why .. suppose account is
+        // to keep things simple don't allow self-transfers. Here is why ...
+        // suppose account is
         // Account State txn = 10, balance = 1000;
         // Now txn 100 attempts to debit 100 from this. It sees last committed value as 1000.
         // So sets account state to txn = 100, balance = 900;
         // Now the same txn attempts to credit 100. But the account entry for txn=100 is invisible (because
         // this is Not ended yet). So it ends up seeing again txn=10 and balance = 1000
 
+        //TODO Add support for same account transfer
         if( from == to) return;
 
         Account fromAccount = accounts.get(from);
@@ -83,24 +85,26 @@ public class Bank {
             a2 = fromAccount;
         }
 
+        // Remember that we are working with a "snapshot" of the data. But the underlying data could have changed
+        // since the snapshot was taken. So we need to check and handle that condition ....
+        Transaction txn = pool.next();
         synchronized (a1) {
             synchronized (a2) {
-                Transaction txn = pool.next();
-                toAccount.update( txn, toAccount.balance(txn) + amount);
-                fromAccount.update( txn, fromAccount.balance(txn) - amount);
-                if( endTransaction ) pool.end(txn);
+                if( canUpdate(fromAccount, txn) && canUpdate(toAccount, txn)) {
+                    toAccount.update( txn, toAccount.balance(txn) + amount);
+                    fromAccount.update( txn, fromAccount.balance(txn) - amount);
+                }
+                else {
+                    // Account(s) cannot be updated. So abort !
+                    // Of course in real life we will want to do something different ....
+                }
             }
         }
-
+        pool.end(txn);
     }
 
     public int numberOfAccounts(){
         return numberOfAccounts;
-    }
-
-    // for debugging
-    public List<Long> active() {
-        return pool.active();
     }
 
     // for debugging
